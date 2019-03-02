@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SpyStore.Hol.Models.Entities;
 using SpyStore.Hol.Models.Entities.Base;
-//using SpyStore.Hol.Models.ViewModels;
+using SpyStore.Hol.Models.ViewModels;
+using System;
 
 namespace SpyStore.Hol.Dal.EfStructures
 {
@@ -18,6 +19,9 @@ namespace SpyStore.Hol.Dal.EfStructures
         public DbSet<Product> Products { get; set; }
         public DbSet<ShoppingCartRecord> ShoppingCartRecords { get; set; }
 
+        public DbQuery<CartRecordWithProductInfo> CartRecordWithProductInfos { get; set; }
+        public DbQuery<OrderDetailWithProductInfo> OrderDetailWithProductInfos { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Customer>(entity =>
@@ -31,6 +35,22 @@ namespace SpyStore.Hol.Dal.EfStructures
             {
                 entity.Property(e => e.OrderDate).HasColumnType("datetime").HasDefaultValueSql("getdate()");
                 entity.Property(e => e.ShipDate).HasColumnType("datetime").HasDefaultValueSql("getdate()");
+                entity.Property(e => e.OrderTotal)
+                    .HasColumnType("money")
+                    .HasComputedColumnSql("Store.GetOrderTotal([Id])");
+            });
+
+            modelBuilder.Entity<Order>(entity =>
+            {
+                entity.Property(e => e.OrderDate).HasColumnType("datetime").HasDefaultValueSql("getdate()");
+                entity.Property(e => e.ShipDate).HasColumnType("datetime").HasDefaultValueSql("getdate()");
+            });
+
+            modelBuilder.Entity<OrderDetail>(entity =>
+            {
+                entity.Property(e => e.UnitCost).HasColumnType("money");
+                entity.Property(e => e.LineItemTotal).HasColumnType("money")
+                    .HasComputedColumnSql("[Quantity]*[UnitCost]");
             });
 
             modelBuilder.Entity<OrderDetail>(entity =>
@@ -64,6 +84,16 @@ namespace SpyStore.Hol.Dal.EfStructures
                 entity.Property(e => e.DateCreated).HasColumnType("datetime").HasDefaultValueSql("getdate()");
                 entity.Property(e => e.Quantity).HasDefaultValue(1);
             });
+
+            modelBuilder.Query<CartRecordWithProductInfo>().ToView("CartRecordWithProductInfo", "Store");
+            modelBuilder.Query<OrderDetailWithProductInfo>().ToView("OrderDetailWithProductInfo", "Store");
+        }
+
+        [DbFunction("GetOrderTotal", Schema = "Store")]
+        public static int GetOrderTotal(int orderId)
+        {
+            //code in here doesn’t matter
+            throw new Exception();
         }
     }
 }

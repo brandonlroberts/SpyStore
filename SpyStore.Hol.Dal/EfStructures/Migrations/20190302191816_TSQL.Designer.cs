@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SpyStore.Hol.Dal.EfStructures;
 
 namespace SpyStore.Hol.Dal.EfStructures.Migrations
 {
     [DbContext(typeof(StoreContext))]
-    partial class StoreContextModelSnapshot : ModelSnapshot
+    [Migration("20190302191816_TSQL")]
+    partial class TSQL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,11 +82,6 @@ namespace SpyStore.Hol.Dal.EfStructures.Migrations
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("getdate()");
 
-                    b.Property<decimal?>("OrderTotal")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("money")
-                        .HasComputedColumnSql("Store.GetOrderTotal([Id])");
-
                     b.Property<DateTime>("ShipDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -106,11 +103,6 @@ namespace SpyStore.Hol.Dal.EfStructures.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<decimal?>("LineItemTotal")
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("money")
-                        .HasComputedColumnSql("[Quantity]*[UnitCost]");
 
                     b.Property<int>("OrderId");
 
