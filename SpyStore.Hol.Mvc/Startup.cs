@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -15,6 +10,7 @@ using SpyStore.Hol.Dal.Initialization;
 using SpyStore.Hol.Dal.Repos;
 using SpyStore.Hol.Dal.Repos.Interfaces;
 using SpyStore.Hol.Mvc.Support;
+using System;
 
 namespace SpyStore.Hol.Mvc
 {
@@ -44,6 +40,21 @@ namespace SpyStore.Hol.Mvc
             {
                 var path = Environment.GetEnvironmentVariable("APPDATA");
                 connectionString = connectionString.Replace("{path}", path);
+            }
+
+            if (_env.IsDevelopment() || _env.EnvironmentName == "Local")
+            {
+                services.AddWebOptimizer(false, false);
+            }
+            else
+            {
+                services.AddWebOptimizer(options =>
+                {
+                    options.MinifyCssFiles(); //Minifies all CSS files
+                    //options.MinifyJsFiles(); //Minifies all JS files
+                    options.MinifyJsFiles("js/site.js");
+                    //options.AddJavaScriptBundle("js/validations/validationCode.js", "js/validations/**/*.js");
+                });
             }
 
             services.AddDbContextPool<StoreContext>(options => options
@@ -88,6 +99,7 @@ namespace SpyStore.Hol.Mvc
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            app.UseWebOptimizer();
             app.UseStaticFiles();
             //app.UseCookiePolicy();
 
